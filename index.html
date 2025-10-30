@@ -126,6 +126,8 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            border: 2px solid transparent; /* cegah loncat layout saat selected */
+            box-sizing: border-box;
         }
         
         .food-item:hover {
@@ -135,18 +137,47 @@
         .food-item img {
             max-width: 100%;
             max-height: 100%;
+            min-width: 135px;
+            min-height: 120px;
             width: auto;
             height: auto;
             object-fit: contain;
             transition: all 0.3s ease;
             filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .5));
         }
+
+        
+
+        .food-item.selected img {
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .5))
+                    drop-shadow(0 0 10px rgba(255, 255, 255, 0.95))
+                    drop-shadow(0 0 18px rgba(255, 255, 255, 0.65));
+        }
+        /* Hapus styling lingkaran lama */
         
         .food-item:hover img {
             transform: scale(1.15) rotate(var(--hover-rotate, 0deg));
             filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.9))
                     drop-shadow(0 0 40px rgba(255, 255, 255, 0.7))
                     drop-shadow(0 0 60px rgba(255, 255, 255, 0.5));
+        }
+
+        /* Marker-pen overlay */
+        .pen-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: none;
+        }
+        .food-item.selected .pen-overlay { display: block; }
+        .pen-overlay svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 5; }
+        .pen-overlay path {
+            stroke: rgba(255, 255, 255, 0.95);
+            stroke-width: 6;
+            fill: none;
+            stroke-linecap: round;
+            filter: drop-shadow(0 0 6px rgba(255,255,255,.55)) drop-shadow(0 0 14px rgba(255,255,255,.35));
+            transition: stroke-dashoffset 360ms linear;
         }
         
         #newSessionBtn:hover {
@@ -282,6 +313,21 @@
             flex-direction: column;
             gap: 9px;
         ">
+            <button id="quickResultsBtn" style="
+                display: none;
+                align-self: flex-start;
+                background-color: #4CAF50;
+                color: #ffffff;
+                padding: 8px 14px;
+                border: none;
+                border-radius: 14px;
+                font-size: 12px;
+                font-weight: 700;
+                cursor: pointer;
+                box-shadow: 0 2px 8px rgba(0,0,0,.2);
+                transition: all .2s ease;
+                margin-bottom: 6px;
+            ">Lihat Hasil</button>
             <div class="participant-card" data-participant="0" style="
                 min-width: 72px;
                 height: 72px;
@@ -303,30 +349,11 @@
                         <img id="participant-avatar-0" src="" alt="Avatar" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
                         <div style="padding: 8px 12px; flex: 1;">
                             <div id="participant-name-0" style="font-weight: bold; font-size: 11px; margin-bottom: 4px; color: #333;"></div>
-                            <div id="participant-food-0" style="font-size: 8px; color: #666; margin-bottom: 2px;">
-                                Makanan <span id="participant-food-count-0">0</span>/<span id="participant-food-total-0">2</span>
-                            </div>
-                            <div id="participant-drink-0" style="font-size: 8px; color: #666;">
-                                Minuman <span id="participant-drink-count-0">0</span>/<span id="participant-drink-total-0">1</span>
-                            </div>
+                            <div id="participant-food-0" style="display: none; font-size: 8px; color: #666; margin-bottom: 2px;"></div>
+                            <div id="participant-drink-0" style="display: none; font-size: 8px; color: #666;"></div>
                         </div>
                     </div>
-                    <button class="clear-participant-btn" data-participant="0" style="
-                        background: rgba(255, 0, 0, 0.1);
-                        border: 1px solid rgba(255, 0, 0, 0.3);
-                        color: #d32f2f;
-                        width: 24px;
-                        height: 24px;
-                        border-radius: 50%;
-                        font-size: 12px;
-                        cursor: pointer;
-                        margin-right: 9px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        transition: all 0.3s ease;
-                        flex-shrink: 0;
-                    ">×</button>
+                    
                 </div>
             </div>
             
@@ -351,35 +378,16 @@
                         <img id="participant-avatar-1" src="" alt="Avatar" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
                         <div style="padding: 8px 12px; flex: 1;">
                             <div id="participant-name-1" style="font-weight: bold; font-size: 11px; margin-bottom: 4px; color: #333;"></div>
-                            <div id="participant-food-1" style="font-size: 8px; color: #666; margin-bottom: 2px;">
-                                Makanan <span id="participant-food-count-1">0</span>/<span id="participant-food-total-1">2</span>
-                            </div>
-                            <div id="participant-drink-1" style="font-size: 8px; color: #666;">
-                                Minuman <span id="participant-drink-count-1">0</span>/<span id="participant-drink-total-1">1</span>
-                            </div>
+                            <div id="participant-food-1" style="display: none; font-size: 8px; color: #666; margin-bottom: 2px;"></div>
+                            <div id="participant-drink-1" style="display: none; font-size: 8px; color: #666;"></div>
                         </div>
                     </div>
-                    <button class="clear-participant-btn" data-participant="1" style="
-                        background: rgba(255, 0, 0, 0.1);
-                        border: 1px solid rgba(255, 0, 0, 0.3);
-                        color: #d32f2f;
-                        width: 24px;
-                        height: 24px;
-                        border-radius: 50%;
-                        font-size: 12px;
-                        cursor: pointer;
-                        margin-right: 9px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        transition: all 0.3s ease;
-                        flex-shrink: 0;
-                    ">×</button>
+                    
                 </div>
             </div>
             
             <!-- Tombol Lihat Hasil -->
-            <button id="viewResultsBtn" style="
+            <!-- <button id="viewResultsBtn" style="
                 width: 100%;
                 background-color: #4CAF50;
                 color: white;
@@ -394,7 +402,7 @@
                 transition: all 0.3s ease;
             ">
                 Lihat Hasil
-            </button>
+            </button> -->
         </div>
 
         <!-- Modal Avatar Full Screen -->
@@ -489,8 +497,8 @@
             <div id="foodGrid" style="
                 display: grid;
                 grid-template-columns: repeat(4, 1fr);
-                gap: 3.1em .2em;
-                margin-top: 110px;
+                gap: 1.5em .2em;
+                margin-top: 80px;
                 padding: 10px;
             ">
             </div>
@@ -614,7 +622,7 @@
 
 
 
-    </div>
+        </div>
 
     <!-- Tombol Buat Sesi Baru -->
     <div style="
@@ -649,14 +657,79 @@
 
         let participantsData = [null, null]; // Array untuk menyimpan data 2 partisipan
 
+        // Global state untuk item terpilih (disimpan di localStorage)
+        let selectedItemIds = new Set();
+        let selectedItems = [];
+
+        function loadSelectedItems() {
+            try {
+                // Prefer full objects
+                const savedObjs = localStorage.getItem('selectedItems');
+                if (savedObjs) {
+                    const arr = JSON.parse(savedObjs);
+                    if (Array.isArray(arr)) {
+                        selectedItems = arr;
+                        selectedItemIds = new Set(arr.map(o => Number(o.id)));
+                        return;
+                    }
+                }
+                // Backward compatibility: ids only
+                const savedIds = localStorage.getItem('selectedItemIds');
+                if (savedIds) {
+                    const arr = JSON.parse(savedIds);
+                    if (Array.isArray(arr)) {
+                        selectedItemIds = new Set(arr.map(Number));
+                        selectedItems = Array.from(selectedItemIds).map(id => menuItems.find(m => m.id === id)).filter(Boolean);
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        function saveSelectedItems() {
+            try {
+                localStorage.setItem('selectedItemIds', JSON.stringify(Array.from(selectedItemIds)));
+                localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
+            } catch (e) { /* ignore */ }
+        }
+
         $(document).ready(function() {
+            loadSelectedItems();
             loadParticipants();
             renderFoodItems();
             loadQuestions();
             initializeEventListeners();
             initializeParticipantCards();
             updateParticipantDisplay();
+            updateSelectedVisuals();
+            updateQuickResultsButton();
         });
+
+        function allParticipantsComplete() {
+            const availableParticipants = participantsData.filter(p => p !== null);
+            if (availableParticipants.length === 0) return false;
+            for (const participant of availableParticipants) {
+                const foodItems = participant.items ? participant.items.filter(item => {
+                    const menuItem = menuItems.find(m => m.id === item.itemId);
+                    return menuItem && menuItem.type === 'makanan';
+                }) : [];
+                const drinkItems = participant.items ? participant.items.filter(item => {
+                    const menuItem = menuItems.find(m => m.id === item.itemId);
+                    return menuItem && menuItem.type === 'minuman';
+                }) : [];
+                if (foodItems.length !== 2 || drinkItems.length !== 1) return false;
+            }
+            return true;
+        }
+
+        function maybeAutoShowResults() {
+            // Tampilkan hasil otomatis jika semua partisipan sudah 2 makanan + 1 minuman
+            if (allParticipantsComplete()) {
+                // Sedikit delay agar UI sinkron terlebih dahulu
+                setTimeout(() => {
+                    showAllResults();
+                }, 200);
+            }
+        }
 
         function saveParticipants() {
             localStorage.setItem('participantsData', JSON.stringify(participantsData));
@@ -671,28 +744,23 @@
                     participantsData = [null, null];
                 }
             }
+            // Set default Player 1 & Player 2 jika belum ada
+            if (!participantsData[0]) {
+                participantsData[0] = { name: 'Player 1', total: 0, items: [] };
+            }
+            if (!participantsData[1]) {
+                participantsData[1] = { name: 'Player 2', total: 0, items: [] };
+            }
+            saveParticipants();
         }
 
         function initializeParticipantCards() {
+            // Nonaktifkan view detail partisipan (klik kartu tidak melakukan apa-apa)
             $('.participant-card').on('click', function() {
-                const participantIndex = parseInt($(this).data('participant'));
-                const participant = participantsData[participantIndex];
-                
-                if (!participant) {
-                    // Jika belum ada, tampilkan form untuk menambah partisipan
-                    addParticipant(participantIndex);
-                } else {
-                    // Jika sudah ada, tampilkan modal avatar full screen
-                    showParticipantModal(participantIndex);
-                }
+                return;
             });
             
-            // Clear button handler
-            $('.clear-participant-btn').on('click', function(e) {
-                e.stopPropagation(); // Prevent card click event
-                const participantIndex = parseInt($(this).data('participant'));
-                clearParticipant(participantIndex);
-            });
+            // Fitur hapus partisipan dihapus
             
             // Close modal handlers
             $('#closeModalBtn').on('click', function() {
@@ -706,23 +774,7 @@
             });
         }
         
-        function clearParticipant(index) {
-            Swal.fire({
-                title: 'Hapus Partisipan?',
-                text: 'Data partisipan akan dihapus',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Hapus',
-                cancelButtonText: 'Batal',
-                confirmButtonColor: '#d32f2f'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    participantsData[index] = null;
-                    saveParticipants();
-                    updateParticipantDisplay();
-                }
-            });
-        }
+        // Fitur hapus partisipan dihapus
         
         function showParticipantModal(index) {
             const participant = participantsData[index];
@@ -764,82 +816,13 @@
         }
 
         function addParticipant(index) {
-            Swal.fire({
-                title: 'Tambah Partisipan',
-                input: 'text',
-                inputLabel: 'Nama Partisipan',
-                inputPlaceholder: 'Masukkan nama',
-                showCancelButton: true,
-                confirmButtonText: 'Simpan',
-                cancelButtonText: 'Batal',
-                inputValidator: (value) => {
-                    if (!value || value.trim() === '') {
-                        return 'Harap masukkan nama!';
-                    }
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    participantsData[index] = {
-                        name: result.value,
-                        total: 0,
-                        items: []
-                    };
-                    saveParticipants();
-                    updateParticipantDisplay();
-                }
-            });
+            // Dinonaktifkan: partisipan default Player 1 & Player 2
+            return;
         }
 
         function editParticipant(index) {
-            Swal.fire({
-                title: 'Edit Partisipan',
-                text: 'Pilih aksi',
-                showCancelButton: true,
-                showDenyButton: true,
-                confirmButtonText: 'Edit Nama',
-                denyButtonText: 'Hapus',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Edit nama
-                    Swal.fire({
-                        title: 'Edit Nama',
-                        input: 'text',
-                        inputLabel: 'Nama Partisipan',
-                        inputValue: participantsData[index].name,
-                        showCancelButton: true,
-                        confirmButtonText: 'Simpan',
-                        cancelButtonText: 'Batal',
-                        inputValidator: (value) => {
-                            if (!value || value.trim() === '') {
-                                return 'Harap masukkan nama!';
-                            }
-                        }
-                    }).then((editResult) => {
-                        if (editResult.isConfirmed) {
-                            participantsData[index].name = editResult.value;
-                            saveParticipants();
-                            updateParticipantDisplay();
-                        }
-                    });
-                } else if (result.isDenied) {
-                    // Hapus partisipan
-                    Swal.fire({
-                        title: 'Hapus Partisipan?',
-                        text: 'Data partisipan akan dihapus',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Hapus',
-                        cancelButtonText: 'Batal'
-                    }).then((deleteResult) => {
-                        if (deleteResult.isConfirmed) {
-                            participantsData[index] = null;
-                            saveParticipants();
-                            updateParticipantDisplay();
-                        }
-                    });
-                }
-            });
+            // Dinonaktifkan: tidak ada edit nama
+            return;
         }
 
         function clearSession() {
@@ -854,19 +837,28 @@
                 cancelButtonColor: '#6c757d'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Reset participantsData
-                    participantsData = [null, null];
+                    // Reset in-memory states
+                    participantsData = [
+                        { name: 'Player 1', total: 0, items: [] },
+                        { name: 'Player 2', total: 0, items: [] }
+                    ];
+                    selectedItemIds = new Set();
+                    selectedItems = [];
                     
-                    // Clear localStorage
-                    localStorage.removeItem('participantsData');
+                    // Clear ALL localStorage
+                    try { localStorage.clear(); } catch(e) {}
+                    // Persist default players back
+                    try { localStorage.setItem('participantsData', JSON.stringify(participantsData)); } catch(e) {}
                     
-                    // Update tampilan
+                    // Update tampilan & visual markers
                     updateParticipantDisplay();
+                    updateSelectedVisuals();
+                    updateQuickResultsButton && updateQuickResultsButton();
                     
                     // Show success message
                     Swal.fire({
                         title: 'Berhasil!',
-                        text: 'Semua data telah dihapus. Sesi baru siap digunakan.',
+                        text: 'Semua data dan pilihan telah dibersihkan. Sesi baru siap.',
                         icon: 'success',
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#4CAF50'
@@ -941,13 +933,283 @@
                     'alt': item.name
                 });
                 $foodItem.append($img);
-                $foodItem.on('click', function() {
-                    showItemInput(item);
+                
+                // Marker-pen overlay (hidden by default, shown when selected)
+                const $pen = $('<div class="pen-overlay"><svg viewBox="-1 -1 2 2"><path pathLength="1000" vector-effect="non-scaling-stroke"></path></svg></div>');
+                $foodItem.append($pen);
+                // Klik gambar/item: validasi kuota, toggle highlight + simpan ke localStorage
+                $foodItem.on('click', function(e) {
+                    e.stopPropagation();
+                    const $el = $(this);
+                    const idNum = Number($el.attr('id'));
+                    const isCurrentlySelected = $el.hasClass('selected');
+                    const mi = menuItems.find(m => m.id === idNum);
+                    if (!mi) return;
+                    
+                    // Jika akan memilih (belum selected), cek limit 2 makanan & 1 minuman
+                    if (!isCurrentlySelected) {
+                        const foodCount = selectedItems.filter(s => s.type === 'makanan').length;
+                        const drinkCount = selectedItems.filter(s => s.type === 'minuman').length;
+                        if (mi.type === 'makanan' && foodCount >= 2) {
+                            Swal.fire({
+                                title: 'Perhatian',
+                                text: 'Sudah memilih 2 makanan. Unselect salah satu dulu.',
+                                icon: 'warning',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#FFA500'
+                            });
+                            return; // batal
+                        }
+                        if (mi.type === 'minuman' && drinkCount >= 1) {
+                            Swal.fire({
+                                title: 'Perhatian',
+                                text: 'Sudah memilih 1 minuman. Unselect dulu untuk ganti.',
+                                icon: 'warning',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#FFA500'
+                            });
+                            return; // batal
+                        }
+                    }
+                    
+                    // Lolos validasi → toggle
+                    $el.toggleClass('selected');
+                    if ($el.hasClass('selected')) {
+                        selectedItemIds.add(idNum);
+                        if (!selectedItems.some(si => si.id === idNum)) selectedItems.push(mi);
+                        drawMarker($el);
+                    } else {
+                        selectedItemIds.delete(idNum);
+                        selectedItems = selectedItems.filter(si => si.id !== idNum);
+                    }
+                    saveSelectedItems();
+                    maybeTriggerSelectionComplete();
+                    updateQuickResultsButton();
                 });
                 $foodGrid.append($foodItem);
             });
             
             applyRandomRotation();
+            initMarkers();
+            updateSelectedVisuals();
+        }
+
+        function initMarkers() {
+            $('.pen-overlay path').each(function() {
+                const path = this;
+                const len = path.getTotalLength ? path.getTotalLength() : 1000;
+                path.style.strokeDasharray = len;
+                path.style.strokeDashoffset = len;
+                path.style.visibility = 'hidden';
+            });
+        }
+
+        function drawMarker($item) {
+            const path = $item.find('.pen-overlay path')[0];
+            if (!path) return;
+            path.setAttribute('d', circlePath(-0.12, 0.08, 120, 220, 0.03, 0.35));
+            const len = path.getTotalLength ? path.getTotalLength() : 1000;
+            path.style.visibility = 'visible';
+            path.style.strokeDasharray = len;
+            path.style.strokeDashoffset = len;
+            // reflow to apply transition
+            path.getBoundingClientRect();
+            path.style.strokeDashoffset = 0;
+        }
+
+        function showMarkerNoAnim($item) {
+            const path = $item.find('.pen-overlay path')[0];
+            if (!path) return;
+            path.setAttribute('d', circlePath(-0.12, 0.08, 120, 220, 0.03, 0.35));
+            const len = path.getTotalLength ? path.getTotalLength() : 1000;
+            path.style.visibility = 'visible';
+            path.style.strokeDasharray = len;
+            path.style.strokeDashoffset = 0;
+        }
+
+        function circlePath(dr_min, dr_max, t0_min, t0_max, dt_min, dt_max) {
+            const c = 0.551915024494;
+            const beta = Math.atan(c);
+            let r = 1;
+            let theta = ((t0_min + Math.random() * (t0_max - t0_min)) * Math.PI) / 180;
+            const d = Math.sqrt(c * c + 1);
+            let dstr = 'M';
+            dstr += [r * Math.sin(theta), r * Math.cos(theta)];
+            dstr += ' C' + [d * r * Math.sin(theta + beta), d * r * Math.cos(theta + beta)];
+            for (let i = 0; i < 4; i++) {
+                theta += (Math.PI / 2) * (1 + dt_min + Math.random() * (dt_max - dt_min));
+                r *= 1 + dr_min + Math.random() * (dr_max - dr_min);
+                dstr += ' ' + (i ? 'S' : '') + [d * r * Math.sin(theta - beta), d * r * Math.cos(theta - beta)];
+                dstr += ' ' + [r * Math.sin(theta), r * Math.cos(theta)];
+            }
+            return dstr;
+        }
+        
+        function updateSelectedVisuals() {
+            $('.food-item').each(function() {
+                const $el = $(this);
+                const id = parseInt($el.attr('id'));
+                const path = $el.find('.pen-overlay path')[0];
+                if (selectedItemIds.has(id)) {
+                    $el.addClass('selected');
+                    // tampilkan marker tanpa animasi pada load
+                    showMarkerNoAnim($el);
+                } else {
+                    $el.removeClass('selected');
+                    if (path) {
+                        const len = path.getTotalLength ? path.getTotalLength() : 1000;
+                        path.style.strokeDasharray = len;
+                        path.style.strokeDashoffset = len;
+                        path.style.visibility = 'hidden';
+                    }
+                }
+            });
+            updateQuickResultsButton();
+        }
+
+        function updateQuickResultsButton() {
+            const foodCount = selectedItems.filter(mi => mi.type === 'makanan').length;
+            const drinkCount = selectedItems.filter(mi => mi.type === 'minuman').length;
+            if (foodCount === 2 && drinkCount === 1) {
+                $('#quickResultsBtn').css('display', 'inline-block');
+            } else {
+                $('#quickResultsBtn').css('display', 'none');
+            }
+        }
+
+        function maybeTriggerSelectionComplete() {
+            let foodCount = 0;
+            let drinkCount = 0;
+            selectedItems.forEach(mi => {
+                if (!mi) return;
+                if (mi.type === 'makanan') foodCount++;
+                if (mi.type === 'minuman') drinkCount++;
+            });
+            if (foodCount === 2 && drinkCount === 1) {
+                Swal.fire({
+                    title: 'Masukkan Tebakan Harga',
+                    html: `
+                        <div style="text-align:left;">
+                            <div style="margin-bottom:10px; font-weight:600;">Player 1</div>
+                            <input type="number" id="guess-player-1" class="swal2-input" placeholder="Tebak harga Player 1" min="0" step="100" style="width:100%; box-sizing:border-box; margin:0;">
+                            <div style="margin:14px 0 10px; font-weight:600;">Player 2</div>
+                            <input type="number" id="guess-player-2" class="swal2-input" placeholder="Tebak harga Player 2" min="0" step="100" style="width:100%; box-sizing:border-box; margin:0;">
+                        </div>
+                    `,
+                    focusConfirm: false,
+                    showCancelButton: true,
+                    cancelButtonText: 'Batal',
+                    confirmButtonText: 'Lihat Hasil',
+                    confirmButtonColor: '#4CAF50',
+                    preConfirm: () => {
+                        const p1 = parseInt(document.getElementById('guess-player-1').value, 10);
+                        const p2 = parseInt(document.getElementById('guess-player-2').value, 10);
+                        if (isNaN(p1) || p1 < 0) {
+                            Swal.showValidationMessage('Masukkan tebakan harga Player 1 yang valid');
+                            return false;
+                        }
+                        if (isNaN(p2) || p2 < 0) {
+                            Swal.showValidationMessage('Masukkan tebakan harga Player 2 yang valid');
+                            return false;
+                        }
+                        try {
+                            localStorage.setItem('priceGuesses', JSON.stringify({ player1: p1, player2: p2 }));
+                        } catch (e) {}
+                        return { p1, p2 };
+                    }
+                }).then((res) => {
+                    if (res.isConfirmed) {
+                        // Tampilkan hasil perbandingan tebakan vs total harga
+                        try { showPriceGuessResults(); } catch (e) {}
+                    }
+                });
+            }
+        }
+
+        // Tampilkan hasil: hitung total harga selectedItems dan bandingkan tebakan Player 1 vs Player 2
+        function showPriceGuessResults() {
+            // Validasi jumlah pilihan (2 makanan, 1 minuman)
+            const foodCount = selectedItems.filter(mi => mi.type === 'makanan').length;
+            const drinkCount = selectedItems.filter(mi => mi.type === 'minuman').length;
+            if (foodCount !== 2 || drinkCount !== 1) {
+                Swal.fire({
+                    title: 'Perhatian',
+                    text: 'Pilih tepat 2 makanan dan 1 minuman terlebih dahulu.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#FFA500'
+                });
+                return;
+            }
+
+            // Ambil tebakan
+            let guesses = null;
+            try {
+                const s = localStorage.getItem('priceGuesses');
+                if (s) guesses = JSON.parse(s);
+            } catch (e) {}
+            if (!guesses || typeof guesses.player1 !== 'number' || typeof guesses.player2 !== 'number') {
+                Swal.fire({
+                    title: 'Perhatian',
+                    text: 'Masukkan tebakan harga untuk Player 1 dan Player 2 dulu.',
+                    icon: 'info',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            const totalPrice = selectedItems.reduce((sum, it) => sum + (it.price || 0), 0);
+            const g1 = guesses.player1;
+            const g2 = guesses.player2;
+
+            // Logika: Price is Right (max lower, jika tidak ada → min higher)
+            const all = [
+                { name: 'Player 1', value: g1 },
+                { name: 'Player 2', value: g2 }
+            ];
+            const lower = all.filter(x => x.value <= totalPrice);
+            let winner;
+            if (lower.length > 0) {
+                // Ambil yang terbesar tapi tidak melebihi total
+                const maxLowerVal = Math.max(...lower.map(x => x.value));
+                winner = lower.find(x => x.value === maxLowerVal);
+            } else {
+                // Tidak ada yang di bawah/tepat → ambil yang paling dekat di atas
+                const higher = all.filter(x => x.value > totalPrice);
+                if (higher.length > 0) {
+                    const minHigherVal = Math.min(...higher.map(x => x.value));
+                    winner = higher.find(x => x.value === minHigherVal);
+                }
+            }
+
+            const d1 = Math.abs(totalPrice - g1);
+            const d2 = Math.abs(totalPrice - g2);
+            const winnerText = winner ? `${winner.name} menang` : 'Tidak ada pemenang';
+
+            const breakdown = `
+                <div style="text-align:left;line-height:1.7">
+                    <div><strong>Total Harga:</strong> Rp ${totalPrice.toLocaleString('id-ID')}</div>
+                    <div><strong>Player 1:</strong> Rp ${g1.toLocaleString('id-ID')} (selisih ${d1.toLocaleString('id-ID')})</div>
+                    <div><strong>Player 2:</strong> Rp ${g2.toLocaleString('id-ID')} (selisih ${d2.toLocaleString('id-ID')})</div>
+                </div>
+            `;
+
+            Swal.fire({
+                title: winnerText,
+                html: breakdown,
+                icon: 'success',
+                showDenyButton: true,
+                denyButtonText: 'Buat Sesi Baru',
+                confirmButtonText: 'Tutup',
+                confirmButtonColor: '#4CAF50',
+                didOpen: () => {
+                    setTimeout(() => { try { triggerConfetti(); } catch(e) {} }, 300);
+                }
+            }).then((res) => {
+                if (res.isDenied) {
+                    clearSession();
+                }
+            });
         }
 
         function showItemInput(item) {
@@ -963,13 +1225,13 @@
                 return;
             }
             
-            // Buat HTML untuk daftar partisipan
+            // Buat HTML untuk daftar partisipan (checkbox)
             let participantOptions = '';
-            availableParticipants.forEach((participant, index) => {
+            availableParticipants.forEach((participant) => {
                 const participantIndex = participantsData.indexOf(participant);
                 const avatarUrl = `https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${encodeURIComponent(participant.name)}`;
                 participantOptions += `
-                    <div class="participant-option" style="
+                    <label class="participant-option" style="
                         display: flex;
                         align-items: center;
                         gap: 12px;
@@ -979,12 +1241,13 @@
                         border-radius: 12px;
                         cursor: pointer;
                         transition: all 0.3s ease;
-                    " data-index="${participantIndex}">
+                    ">
+                        <input type="checkbox" class="swal-participant-checkbox" value="${participantIndex}" style="width:16px;height:16px;" />
                         <img src="${avatarUrl}" alt="${participant.name}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                         <div style="flex: 1;">
                             <div style="font-weight: bold; font-size: 14px; color: #333;">${participant.name}</div>
                         </div>
-                    </div>
+                    </label>
                 `;
             });
             
@@ -1003,35 +1266,26 @@
                 confirmButtonText: 'Simpan',
                 cancelButtonText: 'Batal',
                 didOpen: () => {
-                    let selectedParticipantIndex = null;
-                    
-                    // Event handler untuk select participant
-                    document.querySelectorAll('.participant-option').forEach(option => {
-                        option.addEventListener('click', function() {
-                            document.querySelectorAll('.participant-option').forEach(opt => {
-                                opt.style.borderColor = '#e0e0e0';
-                                opt.style.backgroundColor = 'transparent';
-                            });
-                            this.style.borderColor = '#4CAF50';
-                            this.style.backgroundColor = '#f1f8f4';
-                            selectedParticipantIndex = parseInt(this.dataset.index);
-                        });
-                    });
-                    
-                    // Store selected index untuk digunakan di preConfirm
-                    window.swalSelectedParticipant = null;
-                    document.querySelectorAll('.participant-option').forEach(option => {
-                        option.addEventListener('click', function() {
-                            window.swalSelectedParticipant = parseInt(this.dataset.index);
+                    // Highlight baris saat checkbox diubah
+                    document.querySelectorAll('.swal-participant-checkbox').forEach(cb => {
+                        cb.addEventListener('change', function() {
+                            const row = this.closest('.participant-option');
+                            if (this.checked) {
+                                row.style.borderColor = '#4CAF50';
+                                row.style.backgroundColor = '#f1f8f4';
+                            } else {
+                                row.style.borderColor = '#e0e0e0';
+                                row.style.backgroundColor = 'transparent';
+                            }
                         });
                     });
                 },
                 preConfirm: () => {
                     const priceGuess = document.getElementById('swal-item-price').value;
-                    const selectedIndex = window.swalSelectedParticipant;
-                    
-                    if (!selectedIndex && selectedIndex !== 0) {
-                        Swal.showValidationMessage('Pilih partisipan terlebih dahulu!');
+                    const checkedElements = Array.from(document.querySelectorAll('.swal-participant-checkbox:checked'));
+                    const selectedIndices = checkedElements.map(el => parseInt(el.value));
+                    if (selectedIndices.length === 0) {
+                        Swal.showValidationMessage('Pilih minimal satu partisipan!');
                         return false;
                     }
                     
@@ -1040,82 +1294,74 @@
                         return false;
                     }
                     
+                    // Validasi limit tanpa auto-replace: makanan max 2, minuman max 1
+                    const menuItem = menuItems.find(m => m.id === item.id);
+                    const isFood = menuItem && menuItem.type === 'makanan';
+                    const isDrink = menuItem && menuItem.type === 'minuman';
+                    for (const pIndex of selectedIndices) {
+                        const participant = participantsData[pIndex];
+                        if (!participant) continue;
+                        const items = participant.items || [];
+                        const alreadyHasItem = items.some(i => i.itemId === item.id);
+                        const typeCount = items.filter(i => {
+                            const mi = menuItems.find(m => m.id === i.itemId);
+                            return mi && mi.type === (isFood ? 'makanan' : 'minuman');
+                        }).length;
+                        if (!alreadyHasItem) {
+                            if (isFood && typeCount >= 2) {
+                                Swal.showValidationMessage(`${participant.name} sudah memilih 2 makanan. Uncheck salah satu dulu.`);
+                                return false;
+                            }
+                            if (isDrink && typeCount >= 1) {
+                                Swal.showValidationMessage(`${participant.name} sudah memilih 1 minuman. Uncheck salah satu dulu.`);
+                                return false;
+                            }
+                        }
+                    }
+                    
                     return {
-                        participantIndex: selectedIndex,
+                        participantIndices: selectedIndices,
                         quantity: 1, // Setiap item selalu quantity 1
                         priceGuess: parseInt(priceGuess)
                     };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    const { participantIndex, quantity, priceGuess } = result.value;
-                    const participant = participantsData[participantIndex];
-                    
-                    if (!participant.items) {
-                        participant.items = [];
-                    }
-                    
-                    // Check if item already exists
-                    const existingItemIndex = participant.items.findIndex(i => i.itemId === item.id);
-                    
-                    if (existingItemIndex !== -1) {
-                        // Update existing item quantity and price guess
-                        participant.items[existingItemIndex].quantity = quantity;
-                        participant.items[existingItemIndex].priceGuess = priceGuess;
-                    } else {
-                        // Check limit and remove old items if exceeds limit
-                        const foodItems = participant.items.filter(i => {
-                            const menuItem = menuItems.find(m => m.id === i.itemId);
-                            return menuItem && menuItem.type === 'makanan';
-                        });
-                        
-                        const drinkItems = participant.items.filter(i => {
-                            const menuItem = menuItems.find(m => m.id === i.itemId);
-                            return menuItem && menuItem.type === 'minuman';
-                        });
-                        
-                        if (item.type === 'makanan' && foodItems.length >= 2) {
-                            // Remove first food item
-                            const firstFoodItem = foodItems[0];
-                            const firstFoodIndex = participant.items.findIndex(i => {
-                                const menuItem = menuItems.find(m => m.id === i.itemId);
-                                return menuItem && menuItem.type === 'makanan' && i.itemId === firstFoodItem.itemId;
-                            });
-                            if (firstFoodIndex !== -1) {
-                                participant.items.splice(firstFoodIndex, 1);
-                            }
+                    const { participantIndices, quantity, priceGuess } = result.value;
+                    participantIndices.forEach((participantIndex) => {
+                        const participant = participantsData[participantIndex];
+                        if (!participant.items) {
+                            participant.items = [];
                         }
-                        
-                        if (item.type === 'minuman' && drinkItems.length >= 1) {
-                            // Remove first drink item
-                            const firstDrinkItem = drinkItems[0];
-                            const firstDrinkIndex = participant.items.findIndex(i => {
-                                const menuItem = menuItems.find(m => m.id === i.itemId);
-                                return menuItem && menuItem.type === 'minuman' && i.itemId === firstDrinkItem.itemId;
+                        // Cek apakah item sudah ada → update
+                        const existingItemIndex = participant.items.findIndex(i => i.itemId === item.id);
+                        if (existingItemIndex !== -1) {
+                            participant.items[existingItemIndex].quantity = quantity;
+                            participant.items[existingItemIndex].priceGuess = priceGuess;
+                        } else {
+                            participant.items.push({
+                                itemId: item.id,
+                                itemName: item.name,
+                                quantity: quantity,
+                                price: item.price,
+                                priceGuess: priceGuess
                             });
-                            if (firstDrinkIndex !== -1) {
-                                participant.items.splice(firstDrinkIndex, 1);
-                            }
                         }
-                        
-                        // Add new item to participant
-                        participant.items.push({
-                            itemId: item.id,
-                            itemName: item.name,
-                            quantity: quantity,
-                            price: item.price,
-                            priceGuess: priceGuess
-                        });
-                    }
-                    
-                    // Update total
-                    participant.total = participant.items.reduce((sum, item) => {
-                        const menuItem = menuItems.find(m => m.id === item.itemId);
-                        return sum + (menuItem ? menuItem.price * item.quantity : 0);
-                    }, 0);
-                    
+                        // Update total per partisipan
+                        participant.total = participant.items.reduce((sum, it) => {
+                            const menuItem = menuItems.find(m => m.id === it.itemId);
+                            return sum + (menuItem ? menuItem.price * it.quantity : 0);
+                        }, 0);
+                    });
                     saveParticipants();
                     updateParticipantDisplay();
+                    // Sinkronkan highlight item terpilih
+                    updateSelectedVisuals();
+                    // Cek auto tampilkan hasil
+                    maybeAutoShowResults();
+                } else {
+                    // Jika batal/tutup, sinkronkan highlight sesuai data
+                    updateSelectedVisuals();
                 }
             });
         }
@@ -1183,7 +1429,49 @@
             
             // View Results button
             $('#viewResultsBtn').on('click', function() {
-                showAllResults();
+                showPriceGuessResults();
+            });
+            // Quick Results button (top-left)
+            $('#quickResultsBtn').on('click', function() {
+                // Jika belum ada guesses, tampilkan form input
+                let guesses = null;
+                try {
+                    const s = localStorage.getItem('priceGuesses');
+                    if (s) guesses = JSON.parse(s);
+                } catch (e) {}
+                const foodCount = selectedItems.filter(mi => mi.type === 'makanan').length;
+                const drinkCount = selectedItems.filter(mi => mi.type === 'minuman').length;
+                if (foodCount !== 2 || drinkCount !== 1) return;
+                if (!guesses || typeof guesses.player1 !== 'number' || typeof guesses.player2 !== 'number') {
+                    Swal.fire({
+                        title: 'Masukkan Tebakan Harga',
+                        html: `
+                            <div style="text-align:left;">
+                                <div style=\"margin-bottom:10px; font-weight:600;\">Player 1</div>
+                                <input type=\"number\" id=\"guess-player-1\" class=\"swal2-input\" placeholder=\"Tebak harga Player 1\" min=\"0\" step=\"100\" style=\"width:100%; box-sizing:border-box; margin:0;\">
+                                <div style=\"margin:14px 0 10px; font-weight:600;\">Player 2</div>
+                                <input type=\"number\" id=\"guess-player-2\" class=\"swal2-input\" placeholder=\"Tebak harga Player 2\" min=\"0\" step=\"100\" style=\"width:100%; box-sizing:border-box; margin:0;\">
+                            </div>
+                        `,
+                        focusConfirm: false,
+                        showCancelButton: true,
+                        cancelButtonText: 'Batal',
+                        confirmButtonText: 'Lihat Hasil',
+                        confirmButtonColor: '#4CAF50',
+                        preConfirm: () => {
+                            const p1 = parseInt(document.getElementById('guess-player-1').value, 10);
+                            const p2 = parseInt(document.getElementById('guess-player-2').value, 10);
+                            if (isNaN(p1) || p1 < 0) { Swal.showValidationMessage('Masukkan tebakan harga Player 1 yang valid'); return false; }
+                            if (isNaN(p2) || p2 < 0) { Swal.showValidationMessage('Masukkan tebakan harga Player 2 yang valid'); return false; }
+                            try { localStorage.setItem('priceGuesses', JSON.stringify({ player1: p1, player2: p2 })); } catch(e) {}
+                            return { p1, p2 };
+                        }
+                    }).then((res) => {
+                        if (res.isConfirmed) { showPriceGuessResults(); }
+                    });
+                } else {
+                    showPriceGuessResults();
+                }
             });
             
             // New Session button
